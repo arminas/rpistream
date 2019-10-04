@@ -10,8 +10,6 @@ RUN apk update && apk upgrade && \
 # Download sources
 RUN wget "http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" -O nginx.tar.gz
 
-RUN git clone https://github.com/sergey-dryabzhinsky/nginx-rtmp-module.git
-
 # For latest build deps, see https://github.com/nginxinc/docker-nginx/blob/master/mainline/alpine/Dockerfile
 RUN apk add --no-cache --virtual .build-deps \
   gcc \
@@ -27,12 +25,14 @@ RUN apk add --no-cache --virtual .build-deps \
   gd-dev \
   geoip-dev
 
+RUN git clone https://github.com/sergey-dryabzhinsky/nginx-rtmp-module.git
+
 # Reuse same cli arguments as the nginx:alpine image used to build
 RUN CONFARGS=$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p') \
 	mkdir /usr/src && tar -zxC /usr/src -f nginx.tar.gz && \
   RTMPDIR="$(pwd)/nginx-rtmp-module" && \
   cd /usr/src/nginx-$NGINX_VERSION && \
-  ./configure --with-http_ssl_module --with-compat $CONFARGS --add-module=$RTMPDIR && \
+  ./configure --with-http_ssl_module --with-compat $CONFARGS --add-module=$RTMPDIR --with-debug && \
   make && make install
 
 COPY site/* /tmp/html/
