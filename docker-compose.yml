@@ -1,6 +1,6 @@
 version: '3'
 services:
-  web:
+  streamer:
     build: ./streamer
     ports:
       - "80:80"
@@ -8,3 +8,9 @@ services:
       - "1935:1935"
     volumes:
       - ./vod:/videos
+  seed:
+    build: ./seed
+    depends_on:
+      - "streamer"
+    devices:
+      - "/dev/video0:/dev/video0"
