@@ -37,6 +37,8 @@ RUN CONFARGS=$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p') \
 
 COPY site/* /tmp/html/
 
+RUN mkdir videos/ && chmod 777 /videos/
+
 RUN rm /etc/nginx/conf.d/default.conf /etc/nginx/nginx.conf && cp $(pwd)/nginx-rtmp-module/stat.xsl /tmp/stat.xsl
 
 COPY nginx.conf /usr/local/nginx/conf/nginx.conf
