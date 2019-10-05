@@ -53,7 +53,7 @@
                 if (playlistRequest.readyState == XMLHttpRequest.DONE && playlistRequest.status == 200) {
                     let response = JSON.parse(playlistRequest.responseText);
 
-                    sorted = response.sort((a, b) => a.mtime - b.mtime);
+                    sorted = response.sort((a, b) => b.mtime - a.mtime);
 
                     makePlaylist(sorted);
                 }

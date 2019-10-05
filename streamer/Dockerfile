@@ -35,6 +35,8 @@ RUN CONFARGS=$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p') \
   ./configure --with-http_ssl_module --with-compat $CONFARGS --add-module=$RTMPDIR --with-debug && \
   make && make install
 
+RUN apk add ffmpeg
+
 COPY site/* /tmp/html/
 
 RUN mkdir videos/ && chmod 777 /videos/
