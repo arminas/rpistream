@@ -1,39 +1,112 @@
-<!DOCTYPE>
+<!DOCTYPE html>
 <html>
 
 <head>
-  <meta charset="utf8" />
-  <title>My stream!</title>
+    <meta charset="utf8" />
+    <title>My stream!</title>
+
+    <style>
+        #video-wrapper {
+            display: flex;
+            flex-direction: row;
+        }
+
+        #playlist ul {
+            list-style: none;
+            font-family: monospace;
+            font-size: 1.3em;
+            padding: 0;
+            margin: 0;
+        }
+
+        #playlist ul li {
+            font-size: 16px;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        #playlist ul li:hover {
+            background-color: black;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<!-- Or if you want a more recent canary version -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/hls.js@canary"></script> -->
-<video id="video"></video>
-<script>
-  var video = document.getElementById('video');
-  if(Hls.isSupported()) {
-    var hls = new Hls();
-    hls.loadSource('hls/1.m3u8');
-    hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED,function() {
-      video.play();
-  });
- }
- // hls.js is not supported on platforms that do not have Media Source Extensions (MSE) enabled.
- // When the browser has built-in HLS support (check using `canPlayType`), we can provide an HLS manifest (i.e. .m3u8 URL) directly to the video element through the `src` property.
- // This is using the built-in support of the plain video element, without using hls.js.
- // Note: it would be more normal to wait on the 'canplay' event below however on Safari (where you are most likely to find built-in HLS support) the video.src URL must be on the user-driven
- // white-list before a 'canplay' event will be emitted; the last video event that can be reliably listened-for when the URL is not on the white-list is 'loadedmetadata'.
-  else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = 'hls/1.m3u8';
-    video.addEventListener('loadedmetadata',function() {
-      video.play();
-    });
-  }
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <div id="video-wrapper">
+        <video id="video">
+        </video>
+
+        <div id="playlist">
+        </div>
+    </div>
+
+    <script>
+
+        function fetchAndMakePlaylist() {
+            let playlistRequest = new XMLHttpRequest();
+
+            playlistRequest.onreadystatechange = function () {
+                if (playlistRequest.readyState == XMLHttpRequest.DONE && playlistRequest.status == 200) {
+                    let response = JSON.parse(playlistRequest.responseText);
+
+                    sorted = response.sort((a, b) => a.mtime - b.mtime);
+
+                    makePlaylist(sorted);
+                }
+            };
+
+            playlistRequest.open('GET', 'videos/');
+            playlistRequest.send();
+        }
+
+        function makePlaylist(files) {
+            let listElement = document.createElement('ul');
+
+            // first is always live
+            let item = document.createElement('li');
+            item.innerHTML = 'Live';
+            item.addEventListener('click', () => playLive());
+            listElement.appendChild(item);
+
+            files.forEach((f) => {
+                let item = document.createElement('li');
+
+                item.innerHTML = f.name;
+                item.addEventListener('click', () => playVod('/videos/' + f.name));
+
+                listElement.appendChild(item);
+            });
+
+            document.getElementById('playlist').appendChild(listElement);
+        }
+
+        function playLive() {
+            let video = document.getElementById('video');
+
+            let hls = new Hls();
+            hls.loadSource('hls/1.m3u8');
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                video.play();
+            });
+        }
+
+        function playVod(url) {
+            let video = document.getElementById('video');
+
+            video.setAttribute('src', url);
+
+            video.load();
+            video.play();
+        }
+
+        fetchAndMakePlaylist();
+    </script>
 
 </body>
+
 </html>
