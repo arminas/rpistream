@@ -101,7 +101,11 @@
             video.setAttribute('src', url);
 
             video.load();
-            video.play();
+            let promise = video.play();
+
+            promise
+              .then(_ => console.log("Playing..."))
+              .catch(err => console.dir(err));
         }
 
         fetchAndMakePlaylist();
