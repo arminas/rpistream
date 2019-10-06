@@ -14,3 +14,4 @@ services:
       - "streamer"
     devices:
       - "/dev/video0:/dev/video0"
+      - "/dev/vchiq:/dev/vchiq"
