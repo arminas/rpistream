@@ -8,6 +8,8 @@ services:
       - "1935:1935"
     volumes:
       - ./vod:/videos
+    devices:
+      - "/dev/vchiq:/dev/vchiq"
   seed:
     build: ./seed
     depends_on:
